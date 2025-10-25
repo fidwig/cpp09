@@ -18,6 +18,8 @@ int main(int argc, char** argv)
 	input.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 	while (getline(input, line))
 	{
+		float held_worth;
+
 		std::stringstream ss(line);
 		ss >> date;
 		ss.ignore(std::numeric_limits<std::streamsize>::max(), '|');
@@ -27,12 +29,13 @@ int main(int argc, char** argv)
 			std::cerr << "Error: not a positive number.\n";
 			continue ;
 		}
-		if (held_btc > std::numeric_limits<int>::max()) //TODO: float to int !!! not good
+		if (held_btc > 2147483647.0) //TODO: float to int !!! not good
 		{
-			std::cerr << "Error: too large number.\n";
+			std::cerr << "Error: too large a number.\n";
 			continue ;
 		}
+		held_worth = BitcoinExchange::get_price_at_date(date) * held_btc;
 		//TODO: find price in between dates on db maybe
-		std::cout << date << " => " << held_btc << " = " << BitcoinExchange::get_price_at_date(date) * held_btc << std::endl;
+		std::cout << date << " => " << held_btc << " = " << held_worth << std::endl;
 	}
 }

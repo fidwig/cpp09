@@ -4,7 +4,7 @@ std::map<std::string, float> BitcoinExchange::_btc_prices;
 
 int BitcoinExchange::load_and_parse_csv(std::string filename)
 {
-	std::ifstream csv(filename);
+	std::ifstream csv(filename.c_str());
 	std::string line;
 	
 	if (!csv)
@@ -35,5 +35,7 @@ int BitcoinExchange::load_and_parse_csv(std::string filename)
 
 float BitcoinExchange::get_price_at_date(std::string date)
 {
-	return _btc_prices[date];
+	std::map<std::string, float>::iterator it = _btc_prices.lower_bound(date);
+	if (it != _btc_prices.begin()) it--;
+	return it->second;
 }

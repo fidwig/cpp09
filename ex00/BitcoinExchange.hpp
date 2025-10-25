@@ -7,6 +7,8 @@
 #include <sstream>
 #include <iomanip>
 #include <limits>
+#include <iterator>
+#include <stdint.h>
 
 // enum e_errors {
 	// BADFILE,
