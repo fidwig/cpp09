@@ -29,13 +29,13 @@ int main(int argc, char** argv)
 			std::cerr << "Error: not a positive number.\n";
 			continue ;
 		}
-		if (held_btc > 2147483647.0) //TODO: float to int !!! not good
+		if (held_btc > 2147483647.0)
 		{
 			std::cerr << "Error: too large a number.\n";
 			continue ;
 		}
 		held_worth = BitcoinExchange::get_price_at_date(date) * held_btc;
-		//TODO: find price in between dates on db maybe
+		//if held worth > int max : too large a number ?
 		std::cout << date << " => " << held_btc << " = " << held_worth << std::endl;
 	}
 }

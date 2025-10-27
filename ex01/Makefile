@@ -1,6 +1,6 @@
-NAME		= btc
-SRCS		= main.cpp BitcoinExchange.cpp
-INCS		= BitcoinExchange.hpp
+NAME		= RPN
+SRCS		= main.cpp RPN.cpp
+INCS		= RPN.hpp
 OBJDIR		= .obj
 OBJS		= $(SRCS:%.cpp=$(OBJDIR)/%.o)
 RM			= rm -rf
