@@ -5,10 +5,10 @@ static bool issign(int c)
 	return (c == '+' || c == '-' || c == '/' || c == '*');
 }
 
-int main(int ac, char **av)
+int main(int ac, char **av) //TODO: clean code split in multiple functions
 {
 	if (ac != 2)
-		return std::cerr << "Error: usage: ./RPN <reverse polish mathematical expression>\n", -1;
+		return std::cerr << "Error: usage: ./RPN <expression>\n", -1;
 	std::string expr(av[1]);
 
 	for (size_t i = 0; i < expr.size(); i++)
@@ -32,7 +32,7 @@ int main(int ac, char **av)
 		}
 		else {
 			if (stack.size() < 2)
-				return std::cerr << "Error: sign too early\n", -1; //TODO
+				return std::cerr << "Error: sign too early\n", -1;
 			if (symbol == "+") {
 				value = stack.top(); stack.pop();
 				value += stack.top(); stack.pop();
