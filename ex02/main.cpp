@@ -72,12 +72,14 @@ void print_pairs(std::vector<std::vector<int> > pairs)
 void divide_pairs(std::vector<std::vector<int> > &seq)
 {
 	size_t big = seq[0].size();
-	
+	size_t size;
 	std::vector<std::vector<int> >::iterator it;
 
+	if (big == 1)
+		return ;
 	for (it = seq.begin(); it != seq.end(); it++)
 	{
-		size_t size = it->size();
+		size = it->size();
 		if (size == big) {
 			std::vector<int> half1;
 			std::vector<int> half2;
@@ -88,12 +90,12 @@ void divide_pairs(std::vector<std::vector<int> > &seq)
 				else
 					half2.push_back((*it)[i]);
 			}
-			seq.erase(it);
-			seq.insert(it, half2);
-			seq.insert(it, half1);
+			it = seq.erase(it);
+			it = seq.insert(it, half2);
+			it = seq.insert(it, half1);
 		}
 	}		
-	print_pairs(seq); std::cout << std::endl;
+	print_pairs(seq); std::cout << " divided" << std::endl;
 }
 
 std::vector<int> build_final_vector(std::vector<std::vector<int> > seq)
@@ -105,9 +107,25 @@ std::vector<int> build_final_vector(std::vector<std::vector<int> > seq)
 	return clean_seq;
 }
 
-size_t binary_search_insert_index(std::vector<std::vector<int> > seq, int n, size_t limit /*a corresponding to the b i am inserting, if none limit == seq.size() - 1 or -1 will think about*/)
+size_t binary_search_insert(std::vector<std::vector<int> > &seq, std::vector<int> item, size_t upper_bound /*a corresponding to the b i am inserting, if none upper_bound == seq.size() - 1 or -1 will think about*/)
 {
 //TODO: binary search see papers in my pocker
+	int L = 0;
+	int R = (upper_bound < seq.size() ? upper_bound : seq.size() - 1); // seq.size() - 1;
+	size_t m;
+	
+	while (R >= L)
+	{
+		m = L + (R - L) / 2;
+		if (seq[m].back() > item.back())
+			R = m - 1;
+		else
+			L = m + 1;
+	}
+	seq.insert(seq.begin() + L, item);
+	print_pairs(seq);
+	std::cout << " --> inserted at " << L << std::endl;
+	return L; //returns index of insertion (useless atp)
 }
 
 //TODO: NAME
@@ -124,34 +142,63 @@ std::vector<int> name_later(std::vector<std::vector<int> > seq)
 	current_size = seq[0].size();
 	// setting up main, pend and non participating (remaining in seq)
 	sit = seq.begin();
-	size_t i = 0;
+	int i = 0;
+	// while (!seq.empty() && seq.front().size() == current_size)
 	while (sit != seq.end() && sit->size() == current_size)
 	{
 		if (i <= 1) //b1 a1
 			main.push_back(*sit);
-		else {
-			if (i % 2 == 0) //b
-				pend.push_back(*sit);
-			else //a
-				main.push_back(*sit);
-		}
+		else if (i % 2 == 0) //b
+			pend.push_back(*sit);
+		else //a
+			main.push_back(*sit);
 		sit++;
 		i++;
 	}
 
-	int n; //jacobstahl number
+	print_pairs(main); std::cout << " <-- main" << std::endl;
+	print_pairs(pend); std::cout << " <-- pend" << std::endl;
+
+	int js = 3; //jacobstahl number
+	int pjs = 1;
+	i = js - pjs - 1;
 	//how would i know where a(n) is once i have inserted some its not like they were labeled??
 	//TODO: need to think about this
 	//TODO: 
+	while (!pend.empty())
+	{
+		if ((int) pend.size() - 1 >= i)
+		{
+			for (size_t k = i + 1; k-- > 0;)
+			{
+				/*
+				// inserting item <Bn> with n = pjs + i + 1
+				// main[pjs + i + 1] -> <An> in starting main
+				// maybe lookup table
+				i need to figure out how to keep track of where each <A>
+				is in the main when i insert so i can do the binary search accordingly
+				*/
+				binary_search_insert(main, pend[k], main.size());//pjs + k + 1);
+				pend.erase(pend.begin() + k);
+			}
+			int keep = js; js = js + 2 * pjs; pjs = keep;
+			i = js - pjs - 1; //index in pend from jacobsthal number
+		} else {
+			//inserting item <Bn> with n = pjs + [inserted count]
 
-	//binary insertion
-	// mit = main.begin();
-	// pit = pend.begin();
-
+			binary_search_insert(main, pend.front(), main.size() - 1);
+			pend.erase(pend.begin());
+		}
+	}
 	//add remaining from seq at end of main
+	while (sit != seq.end())
+	{
+		main.push_back(*sit);
+		sit++;
+	}
 	if (main[0].size() > 1)
 		return name_later(main);
-	return build_final_vector(seq);
+	return build_final_vector(main);
 }
 
 int main(int argc, char **argv)
@@ -202,6 +249,8 @@ int main(int argc, char **argv)
 		print_pairs(pairs); std::cout << std::endl;
 	}
 
+	v = name_later(pairs);
+	print_vector(v); std::cout << " <-- resulting vector";
 	//----
 
 	return EXIT_SUCCESS;
