@@ -178,7 +178,7 @@ std::vector<int> name_later(std::vector<std::vector<int> > seq)
 				i need to figure out how to keep track of where each <A>
 				is in the main when i insert so i can do the binary search accordingly
 				*/
-				binary_search_insert(main, pend[k], main.size());//pjs + k + 1);
+				binary_search_insert(main, pend[k], main.size() - 1);//pjs + k + 1);
 				pend.erase(pend.begin() + k);
 			}
 			int keep = js; js = js + 2 * pjs; pjs = keep;
