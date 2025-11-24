@@ -6,8 +6,9 @@
 #include <vector>
 #include <deque>
 #include <cstdlib>
+#include <iterator>
 
-template <typename Container = std::vector<int> >
+template <typename Container>
 class PmergeMe
 {
 private:
@@ -19,30 +20,75 @@ public:
 	~PmergeMe() {};
 };
 
-template <typename T>
-class Pair {
-private:
-	T _big;
-	T _small;
-	bool _single;
+template <typename Iterator>
+class GroupIterator {
 public:
-	Pair(T a): _single(true) /*single number, no pair*/ {
-		_big = 0; _small = a;
+	typedef std::iterator_traits<Iterator>::difference_type difference_type;
+	typedef std::iterator_traits<Iterator>::value_type value_type;
+	typedef std::iterator_traits<Iterator>::pointer pointer;
+	typedef std::iterator_traits<Iterator>::reference reference;
+
+	typedef std::iterator_traits<Iterator>::iterator_category iterator_category;
+	// typedef std::random_access_iterator_tag iterator_category;
+	
+	GroupIterator() {};
+	GroupIterator(Iterator it, difference_type size): _it(it)/*std::move(it) ?*/, _size(size)
+	{};
+
+	pointer base() const {
+		return _it;
 	};
-	Pair(T a, T b): _single(false) {
-		if (a > b) {
-			_big = a; _small = b;
-		} else {
-			_big = b; _small = a;
-		}
+
+	difference_type size() const {
+		return _size();
 	};
-	bool hasPair() { return !single; };
-	int getBig() { return _big; };
-	int getSmall() { return _small; };
-	~Pair() {};
+	/*
+	TODO
+	operators:
+	++it
+	it++
+	--it
+	it--
+	+=
+	-=
+	( - only if biderectional operator or random access)
+	>
+	<
+	*it (dereference): return *(std::next(_it, _size - 1)) // dereferences last iterator (_it is first so _it +( _size - 1) is last)
+	it-> : return &(operator*()) // adress of dereferenced
+	== (compares base()s)
+	!= (same ^^^^)
+	> (same ^^^^)
+	< (same ^^^^)
+	>= (same ^^^^)
+	<= (same ^^^^) ///// check friend keyword for some of those
+	+
+	-
+
+------------------------
+	iter_swap(GroupIterator lhs, GroupIterator rhs) //swaps whole groups (from _it to _it + _size-1)
+------------------------
+	*/
+private:
+	Iterator _it;
+	difference_type _size;
 };
 
-#include "PmergeMe.hpp"
+class JacobSthal {
+private:
+	int _prev;
+	int _current;
+	int jacobsthal_at_step_n(int);
+public:
+	JacobSthal();
+	JacobSthal(int);
+	~JacobSthal();
+	
+	// int const & get_prev();
+	// int const & get_current();
+	int const & get_diff();
+	int const & next();
+};
 
 template<typename Container>
 int parse(Container &c, int ac, char **av)
