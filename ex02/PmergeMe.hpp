@@ -67,14 +67,26 @@ public:
 		return keep;
 	} //TODO not sure about this one
 
-	// --it it--;
+	GroupIterator& operator --() {
+		std::advance(_it, -_size);
+		return *this;
+	}
+
+	GroupIterator& operator --(int) {
+		GroupIterator keep = *this;
+		std::advance(_it, -_size);
+		return keep;
+	} //TODO not sure about this one
 
 	GroupIterator& operator +=(int const & incr) {
 		std::advance(_it, _size * incr);
 		return *this;
-	} //TODO still not sure
+	}
 
-	// -=
+	GroupIterator& operator -=(int const & incr) {
+		std::advance(_it, -_size * incr);
+		return *this;
+	}
 
 	bool operator ==(GroupIterator const & other)
 	{
@@ -216,6 +228,16 @@ Container sort_2(Container c)
 	return c;
 }
 
+template <typename Iterator>
+void sort_2(Iterator begin, Iterator end)
+{
+	Iterator second = iter_next(begin);
+	if (second == end)
+		return ;
+	if (*begin > *second)
+		iter_swap(begin, second);
+}
+
 class JacobSthal {
 private:
 	int _prev;
@@ -257,5 +279,29 @@ int parse(Container &c, int ac, char **av)
 		return 0;
 	}
 }
+
+// template <typename T>
+// class Pair {
+// private:
+// 	T _big;
+// 	T _small;
+// public:
+// 	Pair(T a, T b) {
+// 		if (a > b) {
+// 			_big = a;
+// 			_small = b;
+// 		} else {
+// 			_big = b;
+// 			_small = a;
+// 		}
+// 	}
+// 	~Pair() {}
+// 	T const & get_big() { return _big; }
+// 	T const & get_small() { return _small; }
+
+// 	bool operator >(T const & other) const { return _big > other.get_big(); }
+// 	bool operator <(T const & other) const { return _big < other.get_big(); }
+// 	operator int() const { return _big; }
+// };
 
 #endif
