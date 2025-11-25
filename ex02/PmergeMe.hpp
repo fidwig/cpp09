@@ -21,13 +21,17 @@ public:
 };
 
 template <typename Container>
-void print_container(Container v)
+void print_container(Container v, int n = -1)
 {
-	typedef typename Container::iterator iterator;
-	for (iterator it = v.begin(); it != v.end(); it++)
+	typename Container::iterator it;
+	for (it = v.begin(); n != 0 && it != v.end() && (n == -1 || it < v.begin() + n - 1); it++)
 	{
 		std::cout << *it << " ";
 	}
+	if (v.end() == v.begin() + n)
+		std::cout << *it << " ";
+	if (v.end() > v.begin() + n)
+		std::cout << "[...] ";
 }
 
 template <typename Iterator>
