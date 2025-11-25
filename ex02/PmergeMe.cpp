@@ -8,6 +8,8 @@ JacobSthal::JacobSthal(int n) {
 	_prev = jacobsthal_at_step_n(n - 1);
 	_current = jacobsthal_at_step_n(n);
 }
+JacobSthal::~JacobSthal()
+{}
 int JacobSthal::jacobsthal_at_step_n(int n) {
 	if (n <= 0)
 		return 0;
@@ -21,7 +23,7 @@ int JacobSthal::jacobsthal_at_step_n(int n) {
 // int const & JacobSthal::get_current() {
 // 	return _current;
 // }
-int const & JacobSthal::get_diff() {
+int JacobSthal::get_diff() {
 	return _current - _prev;
 }
 int const & JacobSthal::next() {

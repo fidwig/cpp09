@@ -1,14 +1,4 @@
 #include "PmergeMe.hpp"
-
-void print_vector(std::vector<int> v)
-{
-	for (size_t i = 0; i < v.size(); i++)
-	{
-		std::cout << v[i] << (i == v.size() - 1 ? "" : " ");
-	}
-	// std::cout << std::endl;
-}
-
 /*TODO
 make it a template so it works with multiple containers
 revise logic
@@ -29,13 +19,30 @@ and all that with templates so i can use it with multiple containers !
 GROUPITERATORS !!!!
 */
 
-template <typename Container>
-typename Container::iterator binary_search_insert_iterator(Container & dest, typename Container::iterator it, typename Container::iterator upper_bound)
+// template <typename Container>
+// typename Container::iterator binary_search_insert_iterator(Container & dest, typename Container::iterator it, typename Container::iterator upper_bound)
+// {
+// 	typename Container::iterator left = dest.begin();
+// 	// typename Container::iterator right = dest.end();
+// 	typename Container::iterator right = upper_bound;
+// 	typename Container::iterator middle;
+
+// 	while (left <= right)
+// 	{
+// 		middle = left + std::distance(left, right) / 2;
+// 		if (*middle > *it) right = middle - 1;
+// 		else left = middle + 1;
+// 	}
+// 	return left;
+// }
+
+template <typename Iterator>
+Iterator binary_search_insert_iterator(Iterator begin, Iterator end, Iterator it)//, Iterator upper)
 {
-	typename Container::iterator left = dest.begin();
+	Iterator left = begin;
 	// typename Container::iterator right = dest.end();
-	typename Container::iterator right = upper_bound;
-	typename Container::iterator middle;
+	Iterator right = end;
+	Iterator middle;
 
 	while (left <= right)
 	{
@@ -49,23 +56,27 @@ typename Container::iterator binary_search_insert_iterator(Container & dest, typ
 template <typename Container>
 void jacobsthal_insert(Container & main, Container & pend)
 {
+	typedef typename Container::iterator iterator;
 	JacobSthal js(3);
-
+	
 	while (!pend.empty())
 	{
 		if (pend.size() >= (size_t) js.get_diff())
 		{
 			for (int i = js.get_diff() - 1; i >= 0; i--)
 			{
-				typename Container::iterator pos = binary_search_insert_iterator(main, pend.begin() + i; main.end() - 1);
+				iterator pos = binary_search_insert_iterator(main.begin(), main.end() - 1, pend.begin() + i);
+				// iterator pos = binary_search_insert_iterator(main, pend.begin() + i, main.end() - 1);
 				main.insert(pos, pend[i]);
 				pend.erase(pend.begin() + i);
 			}
 			js.next();
 		} else {
-			for (typename Container::iterator it = pend.begin(); it != pend.end(); it++)
+			for (iterator it = pend.begin(); it != pend.end(); it++)
 			{
-				typename Container::iterator pos = binary_search_insert_iterator(main, it, main.end() - 1)
+				iterator pos = binary_search_insert_iterator(main.begin(), main.end() - 1, it);
+				// iterator pos = binary_search_insert_iterator(main, it, main.end() - 1);
+				main.insert(pos, *it);
 			}
 			pend.clear();
 		}
@@ -74,7 +85,7 @@ void jacobsthal_insert(Container & main, Container & pend)
 
 /* would require chunk size overload too ffs
 template <typename Container>
-void jacobsthal_insert(Container & c)
+void jacobsthal_insert(Container & c, size_t group_size)
 {
 	JacobSthal js(3);
 
@@ -82,35 +93,16 @@ void jacobsthal_insert(Container & c)
 }
 */
 
-template <typename Container>
-void swap(typename Container::iterator a, typename Container::iterator b)
-{
-	using std::swap;
-	swap(*a, *b);
-}
-
-template <typename Container>
-typename Container::iterator it_next(typename Container::iterator it)
-{
-	it++;
-	return it;
-}
-
-template <typename Container>
-Container sort_2(Container c)
-{
-	if (c.front() > c.back())
-		swap(c.begin(), c.begin() + 1);
-	return c;
-}
-
-template <typename Container>
 /*
 if the function takes group iterators as argument, it should work fine with the recursion == problem solved i think
 */
+// template <template <class T, class Allocator = std::allocator<T> > class Container>
+template <typename Container>
 // Container fordjohnson_impl(GroupIterator begin, GroupIterator end)
-Container fordjohnson_impl(Container c)
+// Container fordjohnson_impl(Container c) 
+Container fordjohnson(Container c)
 {
+	typedef typename Container::iterator iterator;
 	// if (std::distance(begin, end) <= 1) return ;
 	// if (std::distance(begin, end) == 2) sort_2();
 	if (c.size() <= 1) return c;
@@ -119,24 +111,22 @@ Container fordjohnson_impl(Container c)
 	step 1 make sorted pairs (pairs are created sorted in their constructor)
 */
 	// std::vector<Pair<int> > pairs;
-	typename Container::iterator cit;
-	// for (it = c.begin(); it != c.end(); std::next(it) != c.end() ? std::advance(it, 2) : it++)
-
+	iterator cit;
 	// for (cit = c.begin(); cit != c.end(); cit++)
 	// {
-	// 	if (it_next(cit) != c.end()) {
-	// 		pairs.push_back(Pair(*cit, *it_next(cit))) //pair
+	// 	if (iter_next(cit) != c.end()) {
+	// 		pairs.push_back(Pair(*cit, *iter_next(cit))) //pair
 	// 		cit++;
 	// 	} else
 	// 		pairs.push_back(Pair(*cit)); //single number
 	// }
-
 /*
 	step 2 create main and pend lists containing:
 	main: first small and all bigs
 	pend: all remaining smalls
 	---doing step 1 and 2 at the same time actually and ditching pairs (they are only conceptual now)
-	------might even ditch main and pend and use them conceptually too
+	------might even ditch main and pend
+	--------maybe not actually
 
 	--change the whole thing again with those group_iterators lmao
 	----will work v well tho
@@ -145,38 +135,27 @@ Container fordjohnson_impl(Container c)
 	Container pend;
 	for (cit = c.begin(); cit != c.end(); cit++)
 	{
-		if (it_next(cit) != c.end()) {
-			if (*cit > *it_next(cit))
-				std::swap(*cit, *it_next(cit));
-			main.push_back(*it_next(cit));
+		if (iter_next(cit) != c.end()) {
+			if (*cit > *iter_next(cit))
+				std::swap(*cit, *iter_next(cit));
+			main.push_back(*iter_next(cit));
 		}
 		if (cit == c.begin()) main.push_back(*cit);
 		else pend.push_back(*cit);
-		if (it_next(cit) != c.end())
+		if (iter_next(cit) != c.end())
 			cit++;
 	}
-	// std::vector<std::Pair<int> >::iterator pit;
-	// for (pit = pairs.begin(); pit != pairs.end(); pit++)
-	// {
-	// 	// if (pit == pairs.begin())
-	// 	// 	main.push_back(pit->get_small());
-	// 	// else
-	// 	// 	pend.push_back(pit->get_small());
-	// 	(pit == pairs.begin() ? main : pend).push_back(pit->get_small());
-	// 	if (pit->is_a_pair())
-	// 		main.push_back(pit->get_big());
-	// }
-
 /*
 	step 3: sort main (using ford-johnson recursively)
 	TODO need to figure out how to sort while keeping each small tied to its big
 	-- chunk size overload maybe like keep the whole original list and move em by whole chunks and only evaluate the last int of each chunk
 	---- ^^^^^ sounds like the most sensible idea but fuck
+	---- ^^^^^ with group iterators (no too complicated)
+	-- will need to build main and pend afterwards tho
 	sucks if i dont
 */
-
 	main = fordjohnson(main);
-
+	//rearange pend base on the new main order
 /*
 	step 4;
 	jacobsthal merge insert thing
@@ -186,20 +165,20 @@ Container fordjohnson_impl(Container c)
 */
 	jacobsthal_insert(main, pend);
 
-	return c;
+	return main;
 }
 
-template <typename Container>
-Container fordjohnson(Container c)
-{
-	typename Container::iterator begin = c.begin();
-	typename Container::iterator end = c.end();
+// template <typename Container>
+// Container fordjohnson(Container c)
+// {
+// 	typename Container::iterator begin = c.begin();
+// 	typename Container::iterator end = c.end();
 
 	// GroupIterator gb(b, 1);
 	// GroupIterator ge(e, 1);
 
-	fordjohnson_impl(GroupIterator(begin, 1), GroupIterator(end, 1));
-}
+	// fordjohnson_impl(GroupIterator(begin, 1), GroupIterator(end, 1));
+// }
 
 
 int main(int argc, char **argv) //TODO: USE AT LEAST TWO DIFFERENT CONTAINERS FFS
@@ -210,10 +189,12 @@ int main(int argc, char **argv) //TODO: USE AT LEAST TWO DIFFERENT CONTAINERS FF
 	// PmergeMe p;
 	if (parse(v, argc, argv) < 0)
 		return EXIT_FAILURE;
-	print_vector(v); std::cout << std::endl;
+	print_container(v); std::cout << std::endl;
 	// print_vector(p.get_values());
 
-	fordjohnson(v);
+	v = fordjohnson(v);
+
+	print_container(v); std::cout << std::endl;
 
 	return EXIT_SUCCESS;
 }
