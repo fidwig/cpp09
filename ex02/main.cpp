@@ -19,23 +19,6 @@ and all that with templates so i can use it with multiple containers !
 GROUPITERATORS !!!!
 */
 
-// template <typename Container>
-// typename Container::iterator binary_search_insert_iterator(Container & dest, typename Container::iterator it, typename Container::iterator upper_bound)
-// {
-// 	typename Container::iterator left = dest.begin();
-// 	// typename Container::iterator right = dest.end();
-// 	typename Container::iterator right = upper_bound;
-// 	typename Container::iterator middle;
-
-// 	while (left <= right)
-// 	{
-// 		middle = left + std::distance(left, right) / 2;
-// 		if (*middle > *it) right = middle - 1;
-// 		else left = middle + 1;
-// 	}
-// 	return left;
-// }
-
 template <typename Iterator>
 Iterator binary_search_insert_iterator(Iterator begin, Iterator last, Iterator it)//, Iterator upper)
 {
@@ -53,158 +36,104 @@ Iterator binary_search_insert_iterator(Iterator begin, Iterator last, Iterator i
 	return left;
 }
 
+// template <typename Container>
+// void jacobsthal_insert(Container & main, Container & pend)
+// {
+// 	typedef typename Container::iterator iterator;
+// 	JacobSthal js(3);
+	
+// 	while (!pend.empty())
+// 	{
+// 		if (pend.size() >= (size_t) js.get_diff())
+// 		{
+// 			for (int i = js.get_diff() - 1; i >= 0; i--)
+// 			{
+// 				iterator pos = binary_search_insert_iterator(main.begin(), main.end() - 1, pend.begin() + i);
+// 				// iterator pos = binary_search_insert_iterator(main, pend.begin() + i, main.end() - 1);
+// 				main.insert(pos, pend[i]);
+// 				pend.erase(pend.begin() + i);
+// 			}
+// 			js.next();
+// 		} else {
+// 			for (iterator it = pend.begin(); it != pend.end(); it++)
+// 			{
+// 				iterator pos = binary_search_insert_iterator(main.begin(), main.end() - 1, it);
+// 				// iterator pos = binary_search_insert_iterator(main, it, main.end() - 1);
+// 				main.insert(pos, *it);
+// 			}
+// 			pend.clear();
+// 		}
+// 	}
+// }
+
 template <typename Container>
-void jacobsthal_insert(Container & main, Container & pend)
+void jacobsthal_insert(Container c, size_t size)
 {
 	typedef typename Container::iterator iterator;
 	JacobSthal js(3);
-	
-	while (!pend.empty())
+
+	GroupIterator<iterator> begin(c.begin(), size);
+	GroupIterator<iterator> end(c.end(), size);
+
+	GroupIterator<iterator> jsit = begin + (js.get_diff() - 1) * 2 + 1/* + 1 == small index*/;
+	GroupIterator<iterator> pjsit = begin;
+	while (jsit < end)
 	{
-		if (pend.size() >= (size_t) js.get_diff())
+		for (GroupIterator<iterator> it = jsit; it >= pjsit; it -= 2)
 		{
-			for (int i = js.get_diff() - 1; i >= 0; i--)
-			{
-				iterator pos = binary_search_insert_iterator(main.begin(), main.end() - 1, pend.begin() + i);
-				// iterator pos = binary_search_insert_iterator(main, pend.begin() + i, main.end() - 1);
-				main.insert(pos, pend[i]);
-				pend.erase(pend.begin() + i);
-			}
-			js.next();
-		} else {
-			for (iterator it = pend.begin(); it != pend.end(); it++)
-			{
-				iterator pos = binary_search_insert_iterator(main.begin(), main.end() - 1, it);
-				// iterator pos = binary_search_insert_iterator(main, it, main.end() - 1);
-				main.insert(pos, *it);
-			}
-			pend.clear();
+			//different types here ffs
+			GroupIterator<iterator> pos = binary_search_insert_iterator(begin, end - 1, it);
+			// iterator pos = binary_search_insert_iterator(main, pend.begin() + i, main.end() - 1);
+			group_iter_move(c, pos, it); //TODO group_iterator insert/move, inserts copy of value(s) from it at pos and removes original!! takes whole iterator and not value;
 		}
+		js.next();
+		pjsit = iter_next(jsit, 2);
+		jsit += js.get_diff() * 2;
+	}
+	for (iterator it = pjsit; it < end; it += 2)
+	{
+		iterator pos = binary_search_insert_iterator(begin, end, it);
+		// iterator pos = binary_search_insert_iterator(main, it, main.end() - 1);
+		group_iter_insert(pos, *it);
 	}
 }
 
-template <typename Iterator>
-void jacobsthal_insert(Iterator begin, Iterator end)
-{
-	JacobSthal js(3);
-
-	Iterator jsit = begin + js.get_diff() - 1;
-	Iterator pjsit = begin;
-	while (/* wait for signal */)
-	{
-		if (jsit < end)
-		{
-			for (Iterator it = jsit; it >= pjsit; it--)
-			{
-				iterator pos = binary_search_insert_iterator(begin, end - 1, it.base() + it.size() / 2);
-				// iterator pos = binary_search_insert_iterator(main, pend.begin() + i, main.end() - 1);
-				insert(pos, pend[i]);
-				pend.erase(pend.begin() + i);
-			}
-			js.next();
-			pjsit = jsit;
-			jsit += js.get_diff();
-		} else {
-			for (iterator it = pend.begin(); it != pend.end(); it++)
-			{
-				iterator pos = binary_search_insert_iterator(begin, end, it);
-				// iterator pos = binary_search_insert_iterator(main, it, main.end() - 1);
-				main.insert(pos, *it);
-			}
-			pend.clear();
-		}
-	}
-}
-
-/* would require chunk size overload too ffs
-template <typename Container>
-void jacobsthal_insert(Container & c, size_t group_size)
-{
-	JacobSthal js(3);
-
-
-}
-*/
-
-/*
-if the function takes group iterators as argument, it should work fine with the recursion == problem solved i think
-*/
-// template <typename Container>
-// Container fordjohnson(Container c)
+// template <typename Iterator>
+// // // Container fordjohnson_impl(Container c) 
+// // int fordjohnson_impl(Iterator begin, Iterator end)
+// void fordjohnson_impl(Iterator begin, Iterator end)
 // {
-// 	typedef typename Container::iterator iterator;
-// 	// if (std::distance(begin, end) <= 1) return ;
-// 	// if (std::distance(begin, end) == 2) sort_2();
-// 	if (c.size() <= 1) return c;
-// 	else if (c.size() == 2) return sort_2(c);
-// /*
-// 	step 1 make sorted pairs (pairs are created sorted in their constructor)
-// */
-// 	// std::vector<Pair<int> > pairs;
-// 	iterator cit;
-// 	// for (cit = c.begin(); cit != c.end(); cit++)
-// 	// {
-// 	// 	if (iter_next(cit) != c.end()) {
-// 	// 		pairs.push_back(Pair(*cit, *iter_next(cit))) //pair
-// 	// 		cit++;
-// 	// 	} else
-// 	// 		pairs.push_back(Pair(*cit)); //single number
-// 	// }
-// /*
-// 	step 2 create main and pend lists containing:
-// 	main: first small and all bigs
-// 	pend: all remaining smalls
-// 	---doing step 1 and 2 at the same time actually and ditching pairs (they are only conceptual now)
-// 	------might even ditch main and pend
-// 	--------maybe not actually
-// 	--change the whole thing again with those group_iterators lmao
-// 	----will work v well tho
-// */
-// 	Container main;
-// 	Container pend;
-// 	for (cit = c.begin(); cit != c.end(); cit++)
+// 	if (std::distance(begin, end) <= 1) return c;
+// 	else if (std::distance(begin, end) == 2) return sort_2(begin, end);
+// 	Iterator cit;
+// 	for (cit = begin; cit != end; cit++)
 // 	{
-// 		if (iter_next(cit) != c.end()) {
-// 			if (*cit > *iter_next(cit))
-// 				std::swap(*cit, *iter_next(cit));
-// 			main.push_back(*iter_next(cit));
+// 		if (iter_next(cit) != end) {
+// 			if (*cit < *iter_next(cit))
+// 				iter_swap(cit, iter_next(cit));
 // 		}
-// 		if (cit == c.begin()) main.push_back(*cit);
-// 		else pend.push_back(*cit);
-// 		if (iter_next(cit) != c.end())
+// 		if (iter_next(cit) != end)
 // 			cit++;
 // 	}
-// /*
-// 	step 3: sort main (using ford-johnson recursively)
-// 	TODO need to figure out how to sort while keeping each small tied to its big
-// 	-- chunk size overload maybe like keep the whole original list and move em by whole chunks and only evaluate the last int of each chunk
-// 	---- ^^^^^ sounds like the most sensible idea but fuck
-// 	---- ^^^^^ with group iterators (no too complicated)
-// 	-- will need to build main and pend afterwards tho
-// 	sucks if i dont
-// */
-// 	main = fordjohnson(main);
-// 	//rearange pend base on the new main order
-// /*
-// 	step 4;
-// 	jacobsthal merge insert thing
-// 	fairly easy to do i think
-// 	two options either i managed to sort the list of pairs right away in which case i will insert the smalls as described in the book tihng
-// 	either i didnt in which case i will do as i originally planned and insert pend in main
-// */
-// 	jacobsthal_insert(main, pend);
+// 	fordjohnson_impl(Iterator(begin.base(), begin.size() * 2), Iterator(end.base(), end.size() * 2));
+// 	jacobsthal_insert(begin, end);
 // 	return main;
 // }
 
-template <typename Iterator>
+template <typename Container>
 // // Container fordjohnson_impl(Container c) 
 // int fordjohnson_impl(Iterator begin, Iterator end)
-void fordjohnson_impl(Iterator begin, Iterator end)
+Container fordjohnson_impl(Container c, size_t size)
 {
-	if (std::distance(begin, end) <= 1) return c;
-	else if (std::distance(begin, end) == 2) return sort_2(begin, end);
-	Iterator cit;
-	for (cit = begin; cit != end(); cit++)
+	typedef typename Container::iterator iterator;
+
+	if (c.size() <= 1) return c;
+	else if (c.size() == 2) return sort_2(begin, end);
+	// iterator cit;
+	GroupIterator cit(c.begin(), size);
+	GroupIterator begin(c.begin(), size);
+	GroupIterator end(c.end(), size);
+	for (; cit < end; cit++)
 	{
 		if (iter_next(cit) != end()) {
 			if (*cit < *iter_next(cit))
@@ -213,15 +142,16 @@ void fordjohnson_impl(Iterator begin, Iterator end)
 		if (iter_next(cit) != end())
 			cit++;
 	}
-	fordjohnson_impl(Iterator(begin.base(), begin.size() * 2), Iterator(end.base(), end.size() * 2));
-	jacobsthal_insert(begin, end);
+	main = fordjohnson_impl(c, size * 2);
+	jacobsthal_insert(c, size);
 	return main;
 }
+
 template <typename Container>
 Container fordjohnson(Container c)
 {
 	typename Container::iterator begin = c.begin();
-	typename Container::iterator end = c.end();
+	typename Container::iterator end = endc.end();
 	fordjohnson_impl(GroupIterator(begin), GroupIterator(end));
 }
 
