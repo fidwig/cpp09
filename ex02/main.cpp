@@ -28,30 +28,27 @@ void jacobsthal_insert(Container & A, Container & B)
 	iterator pjsit = B.begin();
 	iterator jsit = B.begin() + js.get_diff() - 1;
 	std::cout << "--------------------------------------" << std::endl; //TODO
-	while (!B.empty())
+	while (jsit < B.end())
 	{
 		std::cout << js.get_diff() << "\tA: "; print_container(A); //TODO
 		std::cout << "\n\tB: "; print_container(B); std::cout << std::endl; //TODO 
-		if (jsit < B.end())//B.size() >= (size_t) js.get_diff())
+		for (iterator it = jsit; it >= pjsit; it--)
 		{
-			for (iterator it = jsit; it >= pjsit; it--)
-			{
-				iterator pos = binary_search_insert_iterator(A.begin(), A.end() - 1, it);
-				// iterator pos = binary_search_insert_iterator(A.begin(), A.end() - 1, B.begin() + i);
-				A.insert(pos, *it);
-				// B.erase(it);
-			}
-			js.next();
-			pjsit = iter_next(jsit);
-			jsit += js.get_diff();
-		} else {
-			for (iterator it = pjsit; it != B.end(); it++)
-			{
-				iterator pos = binary_search_insert_iterator(A.begin(), A.end() - 1, it);
-				A.insert(pos, *it);
-			}
-			break;
+			iterator pos = binary_search_insert_iterator(A.begin(), A.end() - 1, it);
+			// iterator pos = binary_search_insert_iterator(A.begin(), A.end() - 1, B.begin() + i);
+			A.insert(pos, *it);
+			// B.erase(it);
 		}
+		js.next();
+		pjsit = iter_next(jsit);
+		jsit += js.get_diff();
+	}
+	std::cout << js.get_diff() << "\tA: "; print_container(A); //TODO
+	std::cout << "\n\tB: "; print_container(B); std::cout << std::endl; //TODO 
+	for (iterator it = pjsit; it != B.end(); it++)
+	{
+		iterator pos = binary_search_insert_iterator(A.begin(), A.end() - 1, it);
+		A.insert(pos, *it);
 	}
 }
 
