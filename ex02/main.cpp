@@ -1,6 +1,6 @@
 #include "PmergeMe.hpp"
 /*TODO
-try to maintain link between pend and main idk how tho atp i am considering sending it without this part i dont think it will be a problem
+try to maintain link between B and A idk how tho atp i am considering sending it without this part i dont think it will be a problem
 */
 
 template <typename Iterator>
@@ -20,29 +20,29 @@ Iterator binary_search_insert_iterator(Iterator begin, Iterator last, Iterator i
 }
 
 template <typename Container>
-void jacobsthal_insert(Container & main, Container & pend)
+void jacobsthal_insert(Container & A, Container & B)
 {
 	typedef typename Container::iterator iterator;
 	JacobSthal js(3);
 	
-	while (!pend.empty())
+	while (!B.empty())
 	{
-		if (pend.size() >= (size_t) js.get_diff())
+		if (B.size() >= (size_t) js.get_diff())
 		{
 			for (int i = js.get_diff() - 1; i >= 0; i--)
 			{
-				iterator pos = binary_search_insert_iterator(main.begin(), main.end() - 1, pend.begin() + i);
-				main.insert(pos, pend[i]);
-				pend.erase(pend.begin() + i);
+				iterator pos = binary_search_insert_iterator(A.begin(), A.end() - 1, B.begin() + i);
+				A.insert(pos, B[i]);
+				B.erase(B.begin() + i);
 			}
 			js.next();
 		} else {
-			for (iterator it = pend.begin(); it != pend.end(); it++)
+			for (iterator it = B.begin(); it != B.end(); it++)
 			{
-				iterator pos = binary_search_insert_iterator(main.begin(), main.end() - 1, it);
-				main.insert(pos, *it);
+				iterator pos = binary_search_insert_iterator(A.begin(), A.end() - 1, it);
+				A.insert(pos, *it);
 			}
-			pend.clear();
+			B.clear();
 		}
 	}
 }
@@ -55,46 +55,46 @@ Container fordjohnson(Container c)
 	else if (c.size() == 2) return sort_2(c);
 /*
 	step 1 make sorted pairs (pairs are created sorted in their constructor)
-	step 2 create main and pend lists containing:
-	main: first small and all bigs
-	pend: all remaining smalls
+	step 2 create A and B lists containing:
+	A: first small and all bigs
+	B: all remaining smalls
 	doing step 1 and 2 at the same time for convenience
 */
 	iterator cit;
-	Container main;
-	Container pend;
+	Container A;
+	Container B;
 	for (cit = c.begin(); cit != c.end(); cit++)
 	{
 		if (iter_next(cit) != c.end()) {
 			if (*cit > *iter_next(cit))
 				std::swap(*cit, *iter_next(cit));
-			main.push_back(*iter_next(cit));
+			A.push_back(*iter_next(cit));
 		}
-		if (cit == c.begin()) main.push_back(*cit);
-		else pend.push_back(*cit);
+		if (cit == c.begin()) A.push_back(*cit);
+		else B.push_back(*cit);
 		if (iter_next(cit) != c.end())
 			cit++;
 	}
 /*
-	step 3: sort main (using ford-johnson recursively)
+	step 3: sort A (using ford-johnson recursively)
 	TODO need to figure out how to sort while keeping each small tied to its big
 	-- chunk size overload maybe like keep the whole original list and move em by whole chunks and only evaluate the last int of each chunk
 	---- ^^^^^ sounds like the most sensible idea but fuck
-	-- will need to build main and pend afterwards tho
+	-- will need to build A and B afterwards tho
 
-	OR rearange pend base on the new main order after the sort? sound tedious for not much
+	OR rearange B base on the new A order after the sort? sound tedious for not much
 */
-	main = fordjohnson(main);
+	A = fordjohnson(A);
 /*
 	step 4
 	jacobsthal merge insert thing
-	insert each pend item in main following the jacobsthal sequence order
+	insert each B item in A following the jacobsthal sequence order
 	which is: 3-2 5-4 11-10-9-8-7-6 etc
-	until the pend is too small to keep up with the order
-	and insert the remaining in the regular order
+	until the B is too small to keep up with the order
+	and insert the reAing in the regular order
 */
-	jacobsthal_insert(main, pend);
-	return main;
+	jacobsthal_insert(A, B);
+	return A;
 }
 
 #include <ctime>
