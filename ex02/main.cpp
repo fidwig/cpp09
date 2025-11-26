@@ -72,16 +72,16 @@ Container fordjohnson_impl(Container c, size_t group_size)
 	Container A;
 	Container B;
 	for (cit = c.begin(); cit < c.end(); cit += 2)
+	//TODO group iteration
 	{
 		if (iter_next(cit) != c.end()) {
 			if (*cit > *iter_next(cit))
 				std::swap(*cit, *iter_next(cit));
+				//TODO group swap
 			A.push_back(*iter_next(cit));
 		}
 		if (cit == c.begin()) A.push_back(*cit);
 		else B.push_back(*cit);
-		// if (iter_next(cit) != c.end())
-		// 	cit++;
 	}
 /*
 	step 3: sort A (using ford-johnson recursively)
