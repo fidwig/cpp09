@@ -25,30 +25,38 @@ void jacobsthal_insert(Container & A, Container & B)
 	typedef typename Container::iterator iterator;
 	JacobSthal js(3);
 	
+	iterator pjsit = B.begin();
+	iterator jsit = B.begin() + js.get_diff() - 1;
+	std::cout << "--------------------------------------" << std::endl; //TODO
 	while (!B.empty())
 	{
-		if (B.size() >= (size_t) js.get_diff())
+		std::cout << js.get_diff() << "\tA: "; print_container(A); //TODO
+		std::cout << "\n\tB: "; print_container(B); std::cout << std::endl; //TODO 
+		if (jsit < B.end())//B.size() >= (size_t) js.get_diff())
 		{
-			for (int i = js.get_diff() - 1; i >= 0; i--)
+			for (iterator it = jsit; it >= pjsit; it--)
 			{
-				iterator pos = binary_search_insert_iterator(A.begin(), A.end() - 1, B.begin() + i);
-				A.insert(pos, B[i]);
-				B.erase(B.begin() + i);
+				iterator pos = binary_search_insert_iterator(A.begin(), A.end() - 1, it);
+				// iterator pos = binary_search_insert_iterator(A.begin(), A.end() - 1, B.begin() + i);
+				A.insert(pos, *it);
+				// B.erase(it);
 			}
 			js.next();
+			pjsit = iter_next(jsit);
+			jsit += js.get_diff();
 		} else {
-			for (iterator it = B.begin(); it != B.end(); it++)
+			for (iterator it = pjsit; it != B.end(); it++)
 			{
 				iterator pos = binary_search_insert_iterator(A.begin(), A.end() - 1, it);
 				A.insert(pos, *it);
 			}
-			B.clear();
+			break;
 		}
 	}
 }
 
 template <typename Container>
-Container fordjohnson(Container c)
+Container fordjohnson_impl(Container c, size_t group_size)
 {
 	typedef typename Container::iterator iterator;
 	if (c.size() <= 1) return c;
@@ -63,7 +71,7 @@ Container fordjohnson(Container c)
 	iterator cit;
 	Container A;
 	Container B;
-	for (cit = c.begin(); cit != c.end(); cit++)
+	for (cit = c.begin(); cit < c.end(); cit += 2)
 	{
 		if (iter_next(cit) != c.end()) {
 			if (*cit > *iter_next(cit))
@@ -72,8 +80,8 @@ Container fordjohnson(Container c)
 		}
 		if (cit == c.begin()) A.push_back(*cit);
 		else B.push_back(*cit);
-		if (iter_next(cit) != c.end())
-			cit++;
+		// if (iter_next(cit) != c.end())
+		// 	cit++;
 	}
 /*
 	step 3: sort A (using ford-johnson recursively)
@@ -82,9 +90,9 @@ Container fordjohnson(Container c)
 	---- ^^^^^ sounds like the most sensible idea but fuck
 	-- will need to build A and B afterwards tho
 
-	OR rearange B base on the new A order after the sort? sound tedious for not much
+	OR rearange B based on the new A order after the sort? sound tedious for not much
 */
-	A = fordjohnson(A);
+	A = fordjohnson_impl(A, group_size * 2);
 /*
 	step 4
 	jacobsthal merge insert thing
@@ -93,12 +101,18 @@ Container fordjohnson(Container c)
 	until the B is too small to keep up with the order
 	and insert the reAing in the regular order
 */
+	std::cout << "-----------------------------\nSorting list: "; print_container(c); std::cout << std::endl; //TODO
 	jacobsthal_insert(A, B);
 	return A;
 }
 
-#include <ctime>
-int main(int argc, char **argv) //TODO: USE AT LEAST TWO DIFFERENT CONTAINERS FFS
+template <typename Container>
+Container fordjohnson(Container c)
+{
+	return fordjohnson_impl(c, 1);
+}
+
+int main(int argc, char **argv)
 {
 	if (argc < 2)
 		return EXIT_FAILURE;
@@ -109,8 +123,9 @@ int main(int argc, char **argv) //TODO: USE AT LEAST TWO DIFFERENT CONTAINERS FF
 		return EXIT_FAILURE;
 	if (parse(d, argc, argv) < 0)
 		return EXIT_FAILURE;
-	
-	
+
+	//TODO change output format
+
 	std::clock_t start;
 	std::clock_t end;
 	std::cout << "unsorted vector: ";print_container(v, 5); std::cout << std::endl;
@@ -120,11 +135,11 @@ int main(int argc, char **argv) //TODO: USE AT LEAST TWO DIFFERENT CONTAINERS FF
 	std::cout << "sorted vector:   ";print_container(v, 5); std::cout << std::endl;
 	std::cout << "took " << (static_cast<double>(end-start)/CLOCKS_PER_SEC) * 1000.0 * 1000.0 << "µs" << std::endl;
 
-	std::cout << "unsorted deque: ";print_container(d, 5); std::cout << std::endl;
+	std::cout << "unsorted deque: ";print_container(d); std::cout << std::endl;
 	start = std::clock();
 	d = fordjohnson(d);
 	end = std::clock();
-	std::cout << "sorted deque:   ";print_container(d, 5); std::cout << std::endl;
+	std::cout << "sorted deque:   ";print_container(d); std::cout << std::endl;
 	std::cout << "took " << (static_cast<double>(end-start)/CLOCKS_PER_SEC) * 1000.0 * 1000.0 << "µs" << std::endl;
 	/*µ*/
 	return EXIT_SUCCESS;
