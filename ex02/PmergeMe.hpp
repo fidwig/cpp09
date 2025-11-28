@@ -43,8 +43,19 @@ public:
 	// typedef std::random_access_iterator_tag iterator_category;
 	
 	GroupIterator() {}
+	
 	// GroupIterator(Iterator it): _it(it), _size(1)
 	// {};
+
+	GroupIterator(GroupIterator const & copy)
+	{
+		if (this != &copy)
+		{
+			_it = copy.base();
+			_size = copy.size();
+		}
+	}
+
 	GroupIterator(Iterator it, difference_type size): _it(it)/*std::move(it) ?*/, _size(size)
 	{}
 
@@ -53,15 +64,38 @@ public:
 	}
 
 	difference_type size() const {
-		return _size();
+		return _size;
 	}
+
+	static void swap(Iterator &a, Iterator &b)
+	{
+		Iterator c = a;
+		a = b;
+		b = c;
+	}
+
+	GroupIterator& operator =(GroupIterator src) {
+		using std::swap;
+
+		// _it = src.base();
+		swap(_it, src._it);
+		swap(_size, src._size);
+		return *this;
+	}
+
+	GroupIterator& operator =(Iterator it) {
+		using std::swap;
+		swap(_it, it);
+		return *this;
+		// swap(_size, src.size());
+	} //not sure if this shouldnt be a specific function instead of an operator
 
 	GroupIterator& operator ++() {
 		std::advance(_it, _size);
 		return *this;
 	}
 
-	GroupIterator& operator ++(int) {
+	GroupIterator operator ++(int) {
 		GroupIterator keep = *this;
 		std::advance(_it, _size);
 		return keep;
@@ -72,7 +106,7 @@ public:
 		return *this;
 	}
 
-	GroupIterator& operator --(int) {
+	GroupIterator operator --(int) {
 		GroupIterator keep = *this;
 		std::advance(_it, -_size);
 		return keep;
@@ -126,6 +160,13 @@ public:
 		return it;
 	}
 
+	GroupIterator operator -(int const & n)
+	{
+		GroupIterator it = *this;
+		it -= n;
+		return it;
+	}
+
 	value_type operator *()
 	{
 		return *_it; //TODO or *iter_next(_it, size - 1)
@@ -134,6 +175,26 @@ public:
 	value_type * operator ->()
 	{
 		return &*_it; //TODO or &*iter_next(_it, size - 1)
+	}
+
+	static difference_type distance(GroupIterator a, GroupIterator b)
+	{
+		difference_type dist = 0;
+
+		if (a > b) {
+			while (b < a)
+			{
+				dist++;
+				b++;
+			}
+		} else if (b > a) {
+			while (a < b)
+			{
+				dist++;
+				b++;
+			}
+		}
+		return dist;
 	}
 
 	// insert ?
