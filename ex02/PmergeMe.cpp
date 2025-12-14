@@ -17,12 +17,12 @@ int JacobSthal::jacobsthal_at_step_n(int n) {
 		return 1;
 	return (jacobsthal_at_step_n(n - 2) * 2 + jacobsthal_at_step_n(n - 1));
 }
-// int const & JacobSthal::get_prev() {
-// 	return _prev;
-// }
-// int const & JacobSthal::get_current() {
-// 	return _current;
-// }
+int const & JacobSthal::get_prev() {
+	return _prev;
+}
+int const & JacobSthal::get_current() {
+	return _current;
+}
 int JacobSthal::get_diff() {
 	return _current - _prev;
 }

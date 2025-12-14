@@ -9,6 +9,17 @@
 #include <ctime>
 #include <iterator>
 
+#define GREEN "\033[38;2;60;255;60m"
+#define RED "\033[38;2;255;60;60m"
+#define ORANGE "\033[38;2;255;120;60m"
+#define LIGHTORANGE "\033[38;2;255;180;120m"
+#define LIME "\033[38;2;180;255;60m"
+#define PURPLE "\033[38;2;180;120;255m"
+#define BLUE "\033[38;2;120;120;255m"
+#define LIGHTBLUE "\033[38;2;60;240;255m"
+#define GATEKEEP "\033[38;2;240;240;240;48;2;120;120;200m"
+#define RESET "\033[0m"
+
 template <typename Container>
 class PmergeMe
 {
@@ -25,7 +36,7 @@ template <typename Container>
 void print_container(Container v, int n = -1)
 {
 	typename Container::iterator it;
-	for (it = v.begin(); n != 0 && it != v.end() && (n == -1 || it < v.begin() + n - 1); it++)
+	for (it = v.begin(); n != 0 && it < v.end() && (n == -1 || it < v.begin() + n - 1); it++)
 	{
 		std::cout << *it << " ";
 	}
@@ -42,6 +53,31 @@ Iterator iter_next(Iterator iterator, typename std::iterator_traits<Iterator>::d
 	// 	iterator++;
 	std::advance(iterator, distance);
 	return iterator;
+}
+
+template <typename Iterator>
+Iterator iter_prev(Iterator iterator, typename std::iterator_traits<Iterator>::difference_type distance = 1)
+{
+	// while (--increment > 0)
+	// 	iterator++;
+	std::advance(iterator, -distance);
+	return iterator;
+}
+
+template <typename Container>
+void print_container(Container v, size_t size, int n = -1)
+{
+	typename Container::iterator it;
+	int i = 0;
+	for (it = v.begin(); n != 0 && it < v.end() && (n == -1 || it < v.begin() + n - 1); it++)
+	{
+		std::cout << ((i / size) % 2 ? RED : BLUE) << *it << " "RESET;
+		i++;
+	}
+	if (n != -1 && v.end() == v.begin() + n)
+		std::cout << *it << " ";
+	if (v.end() > v.begin() + n && n != -1)
+		std::cout << "[...] ";
 }
 
 template <typename Container>
@@ -69,8 +105,8 @@ public:
 	JacobSthal(int);
 	~JacobSthal();
 	
-	// int const & get_prev();
-	// int const & get_current();
+	int const & get_prev();
+	int const & get_current();
 	int get_diff();
 	int const & next();
 };
