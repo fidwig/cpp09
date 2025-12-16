@@ -57,10 +57,6 @@ void jacobsthal_insert(Container & A, Container & B, size_t size)
 			iterator pos = binary_search_insert_iterator(A.begin(), iter_next(A.begin(), search_limit_offset - size), *iter_next(it, size - 1), size);
 			group_insert(A, pos, it, size);
 			insert_count++;
-
-			//for debugging, means it was inserted
-			// for (size_t i = 0; i < size; i++)
-			// 	*(it + i) = 0;
 		}
 		js.next();
 		pjsit = iter_next(jsit, size);
@@ -260,19 +256,19 @@ int main(int argc, char **argv)
 	//TODO change output format
 	std::clock_t start;
 	std::clock_t end;
-	std::cout << "unsorted vector: ";print_container(v, 15); std::cout << std::endl;
+	std::cout << "unsorted vector: ";print_container(v, 21); std::cout << std::endl;
 	start = std::clock();
 	v = fordjohnson(v);
 	end = std::clock();
-	std::cout << "sorted vector:   ";print_container(v, 15); std::cout << std::endl;
-	std::cout << "took " << (static_cast<double>(end-start)/CLOCKS_PER_SEC) * 1000.0 * 1000.0 << "µs" << std::endl;
+	std::cout << "sorted vector:   ";print_container(v, 21); std::cout << std::endl;
+	std::cout << "time to process a range of " << v.size() << " elements with std::vector : " << (static_cast<double>(end-start)/CLOCKS_PER_SEC) * 1000.0 * 1000.0 << "µs" << std::endl;
 
-	std::cout << "unsorted deque: ";print_container(d); std::cout << std::endl;
+	std::cout << "unsorted deque: ";print_container(d, 21); std::cout << std::endl;
 	start = std::clock();
 	d = fordjohnson(d);
 	end = std::clock();
-	std::cout << "sorted deque:   ";print_container(d); std::cout << std::endl;
-	std::cout << "took " << (static_cast<double>(end-start)/CLOCKS_PER_SEC) * 1000.0 * 1000.0 << "µs" << std::endl;
+	std::cout << "sorted deque:   ";print_container(d, 21); std::cout << std::endl;
+	std::cout << "time to process a range of " << v.size() << " elements with std::deque : " << (static_cast<double>(end-start)/CLOCKS_PER_SEC) * 1000.0 * 1000.0 << "µs" << std::endl;
 	/*µ*/
 	return EXIT_SUCCESS;
 }
